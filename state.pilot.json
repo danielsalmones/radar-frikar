@@ -1,0 +1,27 @@
+{
+ "state_version": 2,
+ "meta": {
+  "created": "2026-09-03T05:54:34+02:00",
+  "queries": [
+   "alleweder"
+  ],
+  "sort_param_detected": "sorter=newestOfferTime",
+  "consecutive_blocked": 1,
+  "pause_until": null,
+  "last_heartbeat": null,
+  "robots": {
+   "checked": "2026-09-03T05:54:34+02:00",
+   "blocked_us": true,
+   "n_rules": 254
+  },
+  "events": [
+   {
+    "ts": "2026-09-03T05:54:42+02:00",
+    "type": "bloqueo",
+    "id": null,
+    "text": "motivo: HTTP 403/bloqueo"
+   }
+  ]
+ },
+ "ads": {}
+}
