@@ -6,7 +6,7 @@
    "alleweder"
   ],
   "sort_param_detected": "sorter=newestOfferTime",
-  "consecutive_blocked": 1,
+  "consecutive_blocked": 0,
   "pause_until": null,
   "last_heartbeat": null,
   "robots": {
@@ -50,6 +50,12 @@
     "type": "bloqueo",
     "id": null,
     "text": "motivo: HTTP 403/bloqueo"
+   },
+   {
+    "ts": "2026-09-03T07:04:30+02:00",
+    "type": "bajada",
+    "id": "3477860040",
+    "text": "6.000 € → 3.100 €"
    }
   ]
  },
@@ -58,15 +64,15 @@
    "id": "3477860040",
    "title": "Alleweder 4 Liegerad/Velomobil",
    "detail_url": "https://www.kleinanzeigen.de/s-anzeige/alleweder-4-liegerad-velomobil/3477860040-217-1279",
-   "location": "33034 Brakel",
-   "seller_name": "",
+   "location": "33034 Nordrhein-Westfalen - Brakel",
+   "seller_name": "via E-Mail teilen",
    "seller_type": "Privat",
    "shipping": false,
    "is_search": false,
    "reserved": false,
    "publish_date": "2026-08-06",
    "price": {
-    "value": 6000,
+    "value": 3100,
     "negotiable": true,
     "free": false
    },
@@ -74,6 +80,10 @@
     [
      "2026-08-06",
      6000
+    ],
+    [
+     "2026-09-03",
+     3100
     ]
    ],
    "description": "Baujahr 2006 damaliger NP : 5000.-€\nErstbesitzer\nExtras:\nabschließbarer Kofferraum, bei Regen kann die Kofferraumklappe über den Kopf gezogen werden und dient zusätzlich als Regenschutz, Windschutzvisier (plus Ersatz),\nTacho Sigma,\nAkku nicht mehr i.O..\nVorderbremsen müssen entlüftet werden, Tool anbei.\nReifen vorn Marke Kojak abgefahren. Ich empfehle ALLE Reifen zu erneuern, da bereits mehrere Jahre aufgezogen und eventuell porös. (Das Alleweder erreicht bergab und auch in Kurven sehr hohe Geschwindigkeiten, alte Reifen sind ein erhebliches Sicherheitsrisiko!)\nLiegeauflage deutliche Abnutzungsspuren.\nFahrzeug war ca. 10 Jahre regelmäßig in Gebrauch für rund 7 km Arbeitsweg, Abgabe wegen Platzmangel und Wechsel bereits vor 9 Jahren zu anderem E- Bike.",
@@ -81,8 +91,8 @@
    "photo_url": "https://img.kleinanzeigen.de/api/v1/prod-ads/images/13/131d566f-8d2d-4cf8-852e-79da5c2a67ba?rule=$_59.JPG",
    "status": "active",
    "first_seen": "2026-09-03T06:03:39+02:00",
-   "last_seen": "2026-09-03T06:27:46+02:00",
-   "last_detail_check": "2026-09-03T06:03:39+02:00",
+   "last_seen": "2026-09-03T07:04:18+02:00",
+   "last_detail_check": "2026-09-03T07:04:18+02:00",
    "queries": [
     "alleweder"
    ]
@@ -114,7 +124,7 @@
    "photo_url": "https://img.kleinanzeigen.de/api/v1/prod-ads/images/a6/a6ae25e3-c6ff-41d6-8c3a-22602c4c7b39?rule=$_59.JPG",
    "status": "active",
    "first_seen": "2026-09-03T06:03:46+02:00",
-   "last_seen": "2026-09-03T06:27:46+02:00",
+   "last_seen": "2026-09-03T07:04:30+02:00",
    "last_detail_check": "2026-09-03T06:03:46+02:00",
    "queries": [
     "alleweder"
@@ -147,7 +157,7 @@
    "photo_url": "https://static.kleinanzeigen.de/static/img/common/logo/logo-kleinanzeigen-og-vertical.png",
    "status": "active",
    "first_seen": "2026-09-03T06:03:53+02:00",
-   "last_seen": "2026-09-03T06:27:46+02:00",
+   "last_seen": "2026-09-03T07:04:30+02:00",
    "last_detail_check": "2026-09-03T06:03:53+02:00",
    "queries": [
     "alleweder"
@@ -180,7 +190,7 @@
    "photo_url": "https://static.kleinanzeigen.de/static/img/common/logo/logo-kleinanzeigen-og-vertical.png",
    "status": "active",
    "first_seen": "2026-09-03T06:04:01+02:00",
-   "last_seen": "2026-09-03T06:27:46+02:00",
+   "last_seen": "2026-09-03T07:04:30+02:00",
    "last_detail_check": "2026-09-03T06:04:01+02:00",
    "queries": [
     "alleweder"

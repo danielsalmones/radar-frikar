@@ -1,6 +1,6 @@
 # Informe del radar — alleweder
 
-> Autogenerado por `src/radar.py` (no editar a mano). Actualizado: 03 Sep 2026 06:46 (Europe/Madrid).
+> Autogenerado por `src/radar.py` (no editar a mano). Actualizado: 03 Sep 2026 07:04 (Europe/Madrid).
 
 **Anuncios en seguimiento:** 4 · activos: 4 · retirados: 0
 **Mínimo histórico visto:** 0 € · **máximo:** 6.000 €
@@ -12,5 +12,5 @@
 |---|---|---|---|---|---|---|
 | [Suche Velomobil Tandem 2 Sitzer Velocars Alleweder Leiba Kin](https://www.kleinanzeigen.de/s-anzeige/suche-velomobil-tandem-2-sitzer-velocars-alleweder-leiba-kinner-/3351968515-217-29817) | Gratis 🎁 (Zu verschenken) | 0 € (hoy) | 14 mar | 50937 Klettenberg · Privat | hoy → hoy | Gesuch |
 | [Suche Velomobile Alleweder .  Bastler](https://www.kleinanzeigen.de/s-anzeige/suche-velomobile-alleweder-bastler/3476905661-217-2906) | 300 € | 300 € (hoy) | 5 ago | 31180 Giesen · Privat | hoy → hoy | 📦 Gesuch |
+| [Alleweder 4 Liegerad/Velomobil](https://www.kleinanzeigen.de/s-anzeige/alleweder-4-liegerad-velomobil/3477860040-217-1279) | 3.100 € VB | 6.000 € (6 ago) → 3.100 € (hoy) | 6 ago | 33034 Nordrhein-Westfalen - Brakel · Privat | hoy → hoy | activo |
 | [Alleweder x](https://www.kleinanzeigen.de/s-anzeige/alleweder-x/3452369760-217-17622) | 5.555 € | 5.555 € (hoy) | 6 jul | 22047 Gartenstadt · Privat | hoy → hoy | Gesuch |
-| [Alleweder 4 Liegerad/Velomobil](https://www.kleinanzeigen.de/s-anzeige/alleweder-4-liegerad-velomobil/3477860040-217-1279) | 6.000 € VB | 6.000 € (6 ago) | 6 ago | 33034 Brakel · Privat | hoy → hoy | activo |
