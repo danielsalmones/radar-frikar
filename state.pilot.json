@@ -165,13 +165,13 @@
      300
     ]
    ],
-   "description": "Hallo\nIch suche ein Velomobil oder einen Alleweder zur Restaurierung zu einem vernünftigen Preis. Auch ein beschädigtes Exemplar wäre in Ordnung. Es sollte nur günstig sein.\nKontakt per E-Mail\nDanke ZUSTAND: unverbastelt.",
+   "description": "Hallo\nIch suche ein Velomobil oder einen Alleweder zur Restaurierung zu einem vernünftigen Preis. Auch ein beschädigtes Exemplar wäre in Ordnung. Es sollte nur günstig sein.\nKontakt per E-Mail\nDanke",
    "description_hash": "b85ddf219c40de89",
    "photo_url": "https://img.kleinanzeigen.de/api/v1/prod-ads/images/a6/a6ae25e3-c6ff-41d6-8c3a-22602c4c7b39?rule=$_59.JPG",
    "status": "active",
    "first_seen": "2026-09-03T07:24:31+02:00",
    "last_seen": "2026-09-03T09:25:43+02:00",
-   "last_detail_check": "2026-09-03T09:25:43+02:00",
+   "last_detail_check": "2026-07-03T09:25:43+02:00",
    "queries": [
     "alleweder"
    ]
