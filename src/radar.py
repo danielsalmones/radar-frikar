@@ -499,7 +499,6 @@ def parse_search(html: str, base_url: str) -> dict:
     out["method"] = method
     return out
 
-
 def parse_detail(html: str) -> dict:
     soup = BeautifulSoup(html, "html.parser")
 
@@ -524,13 +523,25 @@ def parse_detail(html: str) -> dict:
     if pel is not None:
         price = parse_price_text(extract_price_token(pel.get_text(" ", strip=True)))
 
-    # ---- vendedor: caza en TODAS las secciones candidatas ----
+    # ---- vendedor ----
+    # 1) slug del perfil (/s-seiten/<slug>/…): identificador ESTABLE del
+    #    vendedor, mejor que su nombre visible y a prueba de botones
     seller = ""
+    slug = ""
+    for a in soup.find_all("a", href=re.compile("/s-seiten/")):
+        m = re.search(r"/s-seiten/([^/]+)/", a.get("href") or "")
+        if m and m.group(1).lower() not in (
+                "user", "users", "profi", "shop", "shops", "gewerblich",
+                "privat", "member", "profil", "anbieter", "uebersicht"):
+            slug = m.group(1)
+            break
+    # 2) si no hay slug: nombre visible, descartando textos de botones/compartir
     BOTONES = ("nachricht", "message", "schreiben", "senden", "anrufen", "telefon",
                "kontakt", "chat", "merkliste", "profil", "anbieter", "mitglied",
                "verkäufer", "verkaeufer", "member", "details", "anzeigen",
                "bewertung", "newsletter", "gesamter", "teilen", "e-mail", "mail",
-               "via", "kopieren", "link", "speichern")
+               "via", "kopieren", "link", "speichern", "whatsapp", "telegram",
+               "facebook", "pinterest", "drucken", "melden")
     ces = soup.select("[id*=viewad-contact], [class*=membercard], "
                       "[class*=userprofile], [class*=seller]")
     cands = []
@@ -541,35 +552,14 @@ def parse_detail(html: str) -> dict:
             cands.append(tag.get_text(" ", strip=True))
     for a in soup.find_all("a", href=re.compile("/s-seiten/")):
         cands.append(a.get_text(" ", strip=True))
-    # slug del perfil (/s-seiten/<slug>/…): identificador ESTABLE del vendedor,
-    # mejor que el nombre visible y a prueba de textos de botones
-    slug = ""
-    for a in soup.find_all("a", href=re.compile("/s-seiten/")):
-        m = re.search(r"/s-seiten/([^/]+)/", a.get("href") or "")
-        if m and m.group(1).lower() not in ("user", "users", "profi", "shop",
-                                            "shops", "gewerblich", "privat",
-                                            "member", "profil", "anbieter"):
-            slug = m.group(1)
-            break
     for c in cands:
         c = re.sub(r"\s+", " ", c or "").strip()
         if 2 <= len(c) <= 60 and not any(b in c.lower() for b in BOTONES):
             seller = c
             break
-        # slug del perfil (/s-seiten/<slug>/…): identificador ESTABLE del vendedor,
-    # mejor que el nombre visible y a prueba de textos de botones
-    slug = ""
-    for a in soup.find_all("a", href=re.compile("/s-seiten/")):
-        m = re.search(r"/s-seiten/([^/]+)/", a.get("href") or "")
-        if m and m.group(1).lower() not in ("user", "users", "profi", "shop",
-                                            "shops", "gewerblich", "privat",
-                                            "member", "profil", "anbieter"):
-            slug = m.group(1)
-            break
     if slug:
         seller = slug
     if not seller:
-        # diagnóstico ampliado: textos de las secciones + enlaces de perfil
         frags = []
         for ce in ces:
             t = re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "(email)",
@@ -583,6 +573,7 @@ def parse_detail(html: str) -> dict:
         log("[vendedor-diag] nombre no encontrado. Secciones/enlaces de contacto "
             f"({len(frags)}):\n    " + ("\n    ".join(frags[:12]) or "(nada)"))
 
+    # ---- ubicación ----
     loc_el = (soup.select_one("#viewad-locality")
               or soup.select_one("[class*=locality]")
               or soup.select_one("[id*=locality]"))
@@ -605,7 +596,6 @@ def parse_detail(html: str) -> dict:
                     and "nur abholung" not in low,
         "reserved": "reserviert" in low,
     }
-
 
 def fetch_detail(fetcher: Fetcher, cfg: dict, url: str) -> dict | None:
     try:
