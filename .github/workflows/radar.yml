@@ -3,6 +3,7 @@ name: radar-kleinanzeigen
 on:
   schedule:
     - cron: "17 * * * *"      # horario, minuto no redondo (UTC)
+    - cron: "47 * * * *"      # refuerzo: GitHub retrasa/tira crons bajo carga
   workflow_dispatch:
     inputs:
       force_heartbeat:
