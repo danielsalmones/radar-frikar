@@ -520,22 +520,32 @@ def parse_detail(html: str) -> dict:
         price = parse_price_text(extract_price_token(pel.get_text(" ", strip=True)))
 
     seller = ""
+    BOTONES = ("nachricht", "message", "schreiben", "senden", "anrufen", "telefon",
+               "kontakt", "chat", "merkliste", "profil", "anbieter", "mitglied",
+               "verkäufer", "verkaeufer", "member", "details")
     ce = (soup.select_one('[id*="viewad-contact"]')
           or soup.select_one('[class*="membercard"]')
           or soup.select_one('[class*="seller"]'))
+    cands = []
     if ce is not None:
-        sa = ce.find("a")
-        if sa is not None:
-            seller = sa.get_text(" ", strip=True)
-        if not seller:
-            seller = ce.get_text(" ", strip=True)[:40]
-    if not seller:
-        sa = soup.select_one('a[href*="/s-seiten/"]')
-        if sa is not None:
-            seller = sa.get_text(" ", strip=True)
-    if seller.lower() in ("zum profil", "profil", "anbieter", "kontakt", "nachricht",
-                          "mitglied", "verkäufer", "verkaeufer", "user", "member"):
-        seller = ""   # texto de un botón, no un nombre: no sirve para el matching
+        cands += [a.get_text(" ", strip=True) for a in ce.find_all("a")]
+        ne = ce.select_one('[class*="name"], [class*="user"], h2, h3, b')
+        if ne is not None:
+            cands.append(ne.get_text(" ", strip=True))
+    cands += [a.get_text(" ", strip=True")
+              for a in soup.select('a[href*="/s-seiten/"]')]
+    for c in cands:
+        c = re.sub(r"\s+", " ", c or "").strip()
+        if 2 <= len(c) <= 60 and not any(b in c.lower() for b in BOTONES):
+            seller = c
+            break
+    if not seller and ce is not None:
+        # diagnóstico: si falla, el log me enseña el bloque real
+        # (con teléfonos/emails enmascarados, el log de un repo público lo ve todo el mundo)
+        frag = re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "✉", str(ce))
+        frag = re.sub(r"\d[\d\s\-+/]{5,}", "📞", frag)[:700]
+        log("[vendedor-diag] no encontré el nombre del vendedor; bloque de contacto:\n"
+            "    " + frag)
                            
     loc_el = (soup.select_one("#viewad-locality")
               or soup.select_one('[class*="locality"]')
@@ -551,8 +561,8 @@ def parse_detail(html: str) -> dict:
         "seller_name": seller,
         "seller_type": "Gewerblich" if "gewerblich" in low else ("Privat" if "privat" in low else None),
         "photo": og("og:image"),
-        "shipping": bool(soup.select_one('[class*="shipping"], [id*="shipping"]'))
-                    or "versand möglich" in low,
+        "shipping": "versand möglich" in re.sub(r"[\s:\xa0]+", " ", low)
+                    and "nur abholung" not in low,
         "reserved": "reserviert" in low,
     }
 
