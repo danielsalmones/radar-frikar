@@ -506,16 +506,16 @@ def parse_detail(html: str) -> dict:
     title = (h1.get_text(" ", strip=True) if h1 else "") or og("og:title")
 
     desc = ""
-    d = (soup.select_one('[id*="viewad-description"]')
-         or soup.select_one('[class*="viewad-description"]'))
+    d = (soup.select_one("[id*=viewad-description]")
+         or soup.select_one("[class*=viewad-description]"))
     if d is not None:
         desc = re.sub(r"[ \t]+", " ", d.get_text("\n", strip=True))
     if not desc:
         desc = og("og:description") or og("description")
     desc = re.sub(r"(?i)^beschreibung\s*", "", desc).strip()
- 
+
     price = None
-    pel = soup.select_one('[id*="price"]') or soup.select_one('[class*="price"]')
+    pel = soup.select_one("[id*=price]") or soup.select_one("[class*=price]")
     if pel is not None:
         price = parse_price_text(extract_price_token(pel.get_text(" ", strip=True)))
 
@@ -523,33 +523,34 @@ def parse_detail(html: str) -> dict:
     BOTONES = ("nachricht", "message", "schreiben", "senden", "anrufen", "telefon",
                "kontakt", "chat", "merkliste", "profil", "anbieter", "mitglied",
                "verkäufer", "verkaeufer", "member", "details")
-    ce = (soup.select_one('[id*="viewad-contact"]')
-          or soup.select_one('[class*="membercard"]')
-          or soup.select_one('[class*="seller"]'))
+    ce = (soup.select_one("[id*=viewad-contact]")
+          or soup.select_one("[class*=membercard]")
+          or soup.select_one("[class*=seller]"))
     cands = []
     if ce is not None:
-        cands += [a.get_text(" ", strip=True) for a in ce.find_all("a")]
-        ne = ce.select_one('[class*="name"], [class*="user"], h2, h3, b')
+        for a in ce.find_all("a"):
+            cands.append(a.get_text(" ", strip=True))
+        ne = ce.select_one("[class*=name], [class*=user]")
+        if ne is None:
+            ne = ce.find(["h2", "h3", "b"])
         if ne is not None:
             cands.append(ne.get_text(" ", strip=True))
-    cands += [a.get_text(" ", strip=True")
-              for a in soup.select('a[href*="/s-seiten/"]')]
+    for a in soup.find_all("a", href=re.compile("/s-seiten/")):
+        cands.append(a.get_text(" ", strip=True))
     for c in cands:
         c = re.sub(r"\s+", " ", c or "").strip()
         if 2 <= len(c) <= 60 and not any(b in c.lower() for b in BOTONES):
             seller = c
             break
     if not seller and ce is not None:
-        # diagnóstico: si falla, el log me enseña el bloque real
-        # (con teléfonos/emails enmascarados, el log de un repo público lo ve todo el mundo)
-        frag = re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "✉", str(ce))
-        frag = re.sub(r"\d[\d\s\-+/]{5,}", "📞", frag)[:700]
+        frag = re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "(email)", str(ce))
+        frag = re.sub(r"\d[\d\s\-+/]{5,}", "(tel)", frag)[:700]
         log("[vendedor-diag] no encontré el nombre del vendedor; bloque de contacto:\n"
             "    " + frag)
-                           
+
     loc_el = (soup.select_one("#viewad-locality")
-              or soup.select_one('[class*="locality"]')
-              or soup.select_one('[id*="locality"]'))
+              or soup.select_one("[class*=locality]")
+              or soup.select_one("[id*=locality]"))
     location = loc_el.get_text(" ", strip=True) if loc_el is not None else ""
 
     low = soup.get_text(" ", strip=True).lower()
@@ -565,9 +566,7 @@ def parse_detail(html: str) -> dict:
                     and "nur abholung" not in low,
         "reserved": "reserviert" in low,
     }
-
-
-def fetch_detail(fetcher: Fetcher, cfg: dict, url: str) -> dict | None:
+ def fetch_detail(fetcher: Fetcher, cfg: dict, url: str) -> dict | None:
     try:
         r = fetcher.get(url, referer=cfg["base_url"] + "/")
     except Exception as e:
