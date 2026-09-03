@@ -1023,7 +1023,12 @@ def process_existing_ad(state, cfg, fetcher, ad, card, sources, first_run,
         if desc_changed:
             ad["description"] = desc_new
             ad["description_hash"] = hash_text(desc_new)
-
+            # ✏️ detectado ya en esta ficha (no esperamos al re-check de 36 h)
+            if not first_run and cfg["alerts"].get("editado", True):
+                notes_desc = [("descripción", "", diff_snippet(old_desc, desc_new))]
+                send_text(edit_message(ad, notes_desc))
+                events_run.append(add_event(state, "editado", ad["id"], "descripción"))
+             
     if first_run:
         return need_detail
 
@@ -1051,8 +1056,6 @@ def process_existing_ad(state, cfg, fetcher, ad, card, sources, first_run,
         notes.append(("precio", price_label(old_price), price_label(new_price)))
     if title_changed:
         notes.append(("título", old_title, final_title))
-    if desc_changed:
-        notes.append(("descripción", "", diff_snippet(old_desc, desc_new)))
     if reserved_changed:
         notes.append(("reserviert", "Reserviert",
                       "ya no está Reserviert ✅" if old_reserved else "ahora está Reserviert"))
