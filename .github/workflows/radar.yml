@@ -3,7 +3,12 @@ name: radar-kleinanzeigen
 on:
   schedule:
     - cron: "17 * * * *"      # horario, minuto no redondo (UTC)
-  workflow_dispatch: {}       # disparo manual (sin jitter, para pruebas)
+  workflow_dispatch:
+    inputs:
+      force_heartbeat:
+        description: "Forzar el latido semanal (📋) en esta ejecución"
+        type: boolean
+        default: false
 
 # no solapar ejecuciones: se encolan, nunca se cancela una en curso
 concurrency:
@@ -33,6 +38,7 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           RADAR_FAST: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
+          RADAR_FORCE_HEARTBEAT: ${{ github.event.inputs.force_heartbeat == 'true' && '1' || '0' }}
         run: python src/radar.py
 
       - name: Commit y push (state + informes)
