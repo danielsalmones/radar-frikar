@@ -92,6 +92,12 @@
     "type": "nuevo",
     "id": "3477860040",
     "text": "Alleweder 4 Liegerad/Velomobil"
+   },
+   {
+    "ts": "2026-09-03T09:25:49+02:00",
+    "type": "precio_aparecido",
+    "id": "3476905661",
+    "text": "300 €"
    }
   ]
  },
@@ -138,21 +144,25 @@
    "title": "Suche Velomobile Alleweder .  Bastler",
    "detail_url": "https://www.kleinanzeigen.de/s-anzeige/suche-velomobile-alleweder-bastler/3476905661-217-2906",
    "location": "31180 Giesen",
-   "seller_name": "via E-Mail teilen",
+   "seller_name": "Chicco",
    "seller_type": "Privat",
    "shipping": true,
    "is_search": true,
    "reserved": false,
    "publish_date": "2026-08-05",
    "price": {
-    "value": null,
-    "negotiable": true,
+    "value": 300,
+    "negotiable": false,
     "free": false
    },
    "history": [
     [
      "2026-08-20",
      null
+    ],
+    [
+     "2026-09-03",
+     300
     ]
    ],
    "description": "Hallo\nIch suche ein Velomobil oder einen Alleweder zur Restaurierung zu einem vernünftigen Preis. Auch ein beschädigtes Exemplar wäre in Ordnung. Es sollte nur günstig sein.\nKontakt per E-Mail\nDanke ZUSTAND: unverbastelt.",
@@ -160,8 +170,8 @@
    "photo_url": "https://img.kleinanzeigen.de/api/v1/prod-ads/images/a6/a6ae25e3-c6ff-41d6-8c3a-22602c4c7b39?rule=$_59.JPG",
    "status": "active",
    "first_seen": "2026-09-03T07:24:31+02:00",
-   "last_seen": "2026-09-03T09:13:20+02:00",
-   "last_detail_check": "2026-07-03T07:24:31+02:00",
+   "last_seen": "2026-09-03T09:25:43+02:00",
+   "last_detail_check": "2026-09-03T09:25:43+02:00",
    "queries": [
     "alleweder"
    ]
@@ -193,7 +203,7 @@
    "photo_url": "https://static.kleinanzeigen.de/static/img/common/logo/logo-kleinanzeigen-og-vertical.png",
    "status": "active",
    "first_seen": "2026-09-03T07:24:35+02:00",
-   "last_seen": "2026-09-03T09:13:20+02:00",
+   "last_seen": "2026-09-03T09:25:49+02:00",
    "last_detail_check": "2026-09-03T07:24:35+02:00",
    "queries": [
     "alleweder"
@@ -226,7 +236,7 @@
    "photo_url": "https://static.kleinanzeigen.de/static/img/common/logo/logo-kleinanzeigen-og-vertical.png",
    "status": "active",
    "first_seen": "2026-09-03T07:24:39+02:00",
-   "last_seen": "2026-09-03T09:13:20+02:00",
+   "last_seen": "2026-09-03T09:25:49+02:00",
    "last_detail_check": "2026-09-03T07:24:39+02:00",
    "queries": [
     "alleweder"
@@ -296,7 +306,7 @@
    "photo_url": "https://img.kleinanzeigen.de/api/v1/prod-ads/images/13/131d566f-8d2d-4cf8-852e-79da5c2a67ba?rule=$_59.JPG",
    "status": "active",
    "first_seen": "2026-09-03T08:36:51+02:00",
-   "last_seen": "2026-09-03T09:13:20+02:00",
+   "last_seen": "2026-09-03T09:25:43+02:00",
    "last_detail_check": "2026-09-03T09:02:47+02:00",
    "queries": [
     "alleweder"
