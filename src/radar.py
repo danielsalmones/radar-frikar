@@ -615,6 +615,9 @@ def fetch_detail(fetcher: Fetcher, cfg: dict, url: str) -> dict | None:
 def fetch_photo(fetcher: Fetcher, url: str) -> bytes | None:
     if not url:
         return None
+    if "static" in url:
+        # logo genérico del sitio (anuncios sin foto): no enviar como foto
+        return None
     try:
         # Referer del sitio: muchos CDN rechazan imágenes "hotlinkadas" sin él
         r = fetcher.get(url, referer="https://www.kleinanzeigen.de/")
