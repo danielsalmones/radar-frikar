@@ -999,7 +999,6 @@ def retire_ad(state, cfg, ad, first_run, events_run) -> None:
         send_text(retire_message(ad))
     events_run.append(add_event(state, "retirado", ad["id"], ad["title"]))
 
-
 def run_detail_rechecks(state, cfg, fetcher, events_run, already_checked: set) -> None:
     """Re-visita fichas (rotación, máx. N por ejecución) para detectar ediciones
     de descripción y otros cambios que la tarjeta no refleja."""
@@ -1029,7 +1028,7 @@ def run_detail_rechecks(state, cfg, fetcher, events_run, already_checked: set) -
         if d.get("seller_name"):
             ad["seller_name"] = d["seller_name"]
         if d.get("title") and d["title"] != ad["title"]:
-         notes.append(("título", ad["title"], d["title"]))
+            notes.append(("título", ad["title"], d["title"]))
             ad["title"] = d["title"]
         desc = d.get("description") or ""
         if desc and hash_text(desc) != ad.get("description_hash"):
@@ -1059,7 +1058,6 @@ def run_detail_rechecks(state, cfg, fetcher, events_run, already_checked: set) -
         if notes and cfg["alerts"].get("editado", True):
             send_text(edit_message(ad, notes))
             events_run.append(add_event(state, "editado", ad["id"], notes[0][0]))
-
 
 def handle_all_blocked(state, cfg, qres, events_run) -> None:
     """Escalera: 1º registra · 2º ⚠️ · 3º pausa 12 h. Nunca reintentos en bucle."""
