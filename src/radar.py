@@ -529,7 +529,8 @@ def parse_detail(html: str) -> dict:
     BOTONES = ("nachricht", "message", "schreiben", "senden", "anrufen", "telefon",
                "kontakt", "chat", "merkliste", "profil", "anbieter", "mitglied",
                "verkäufer", "verkaeufer", "member", "details", "anzeigen",
-               "bewertung", "newsletter", "gesamter")
+               "bewertung", "newsletter", "gesamter", "teilen", "e-mail", "mail",
+               "via", "kopieren", "link", "speichern")
     ces = soup.select("[id*=viewad-contact], [class*=membercard], "
                       "[class*=userprofile], [class*=seller]")
     cands = []
@@ -540,11 +541,23 @@ def parse_detail(html: str) -> dict:
             cands.append(tag.get_text(" ", strip=True))
     for a in soup.find_all("a", href=re.compile("/s-seiten/")):
         cands.append(a.get_text(" ", strip=True))
+    # slug del perfil (/s-seiten/<slug>/…): identificador ESTABLE del vendedor,
+    # mejor que el nombre visible y a prueba de textos de botones
+    slug = ""
+    for a in soup.find_all("a", href=re.compile("/s-seiten/")):
+        m = re.search(r"/s-seiten/([^/]+)/", a.get("href") or "")
+        if m and m.group(1).lower() not in ("user", "users", "profi", "shop",
+                                            "shops", "gewerblich", "privat",
+                                            "member", "profil", "anbieter"):
+            slug = m.group(1)
+            break
     for c in cands:
         c = re.sub(r"\s+", " ", c or "").strip()
         if 2 <= len(c) <= 60 and not any(b in c.lower() for b in BOTONES):
             seller = c
             break
+    if slug:
+        seller = slug
     if not seller:
         # diagnóstico ampliado: textos de las secciones + enlaces de perfil
         frags = []
@@ -564,6 +577,10 @@ def parse_detail(html: str) -> dict:
               or soup.select_one("[class*=locality]")
               or soup.select_one("[id*=locality]"))
     location = loc_el.get_text(" ", strip=True) if loc_el is not None else ""
+    # '33034 Nordrhein-Westfalen - Brakel' → '33034 Brakel'
+    mloc = re.match(r"^(\d{5})\s+.*?-\s+(.+)$", location)
+    if mloc:
+        location = f"{mloc.group(1)} {mloc.group(2)}"
 
     low = soup.get_text(" ", strip=True).lower()
     return {
