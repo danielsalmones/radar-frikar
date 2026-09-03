@@ -566,7 +566,8 @@ def parse_detail(html: str) -> dict:
                     and "nur abholung" not in low,
         "reserved": "reserviert" in low,
     }
- def fetch_detail(fetcher: Fetcher, cfg: dict, url: str) -> dict | None:
+
+def fetch_detail(fetcher: Fetcher, cfg: dict, url: str) -> dict | None:
     try:
         r = fetcher.get(url, referer=cfg["base_url"] + "/")
     except Exception as e:
