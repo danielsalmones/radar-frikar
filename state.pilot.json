@@ -6,7 +6,7 @@
    "alleweder"
   ],
   "sort_param_detected": "sorter=newestOfferTime",
-  "consecutive_blocked": 0,
+  "consecutive_blocked": 1,
   "pause_until": null,
   "last_heartbeat": null,
   "robots": {
@@ -44,6 +44,12 @@
     "type": "nuevo",
     "id": "3351968515",
     "text": "Suche Velomobil Tandem 2 Sitzer Velocars Alleweder Leiba Kinner"
+   },
+   {
+    "ts": "2026-09-03T06:46:55+02:00",
+    "type": "bloqueo",
+    "id": null,
+    "text": "motivo: HTTP 403/bloqueo"
    }
   ]
  },
