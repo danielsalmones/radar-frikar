@@ -1207,26 +1207,49 @@ def maybe_check_robots(fetcher, cfg, state) -> None:
     if r.status_code != 200:
         log(f"[robots] HTTP {r.status_code} — lo registro y sigo")
         return
-    rules = []
+    # robots.txt: las reglas van por grupos de User-agent — solo el grupo '*'
+    # (genérico) nos concierne; y los comodines de raíz ('/*?utm…') no son
+    # prefijos aplicables a nuestras URL.
+    star_rules = []
+    in_star = False
     for l in r.text.splitlines():
-        m = re.match(r"(?i)disallow:\s*(\S+)", l.strip())
-        if m:
-            rules.append(m.group(1))
-    s_rules = sorted({rv for rv in rules if rv.startswith("/s")})
-    log(f"[robots] {len(set(rules))} reglas Disallow; las que afectan a /s… "
-        f"({len(s_rules)}): " + (", ".join(s_rules) if s_rules else "ninguna"))
+        ls = l.strip()
+        if not ls or ls.startswith("#"):
+            continue
+        if ls.lower().startswith("user-agent:"):
+            in_star = "*" in ls.split(":", 1)[1].split()
+            continue
+        m = re.match(r"(?i)disallow:\s*(\S+)", ls)
+        if m and in_star:
+            star_rules.append(m.group(1))
+    log(f"[robots] grupo '*': {len(set(star_rules))} reglas Disallow · "
+        f"con prefijo /s: "
+        + (", ".join(sorted({ru for ru in star_rules if ru.startswith('/s')})) or "ninguna"))
     slug = re.sub(r"\s+", "-", cfg["queries"][0].strip().lower())
     muestras = [f"/s-{slug}/k0", "/s-anzeige/x/1-1"]
 
     def _bloq(path):
-        return any(path.startswith(rv.split("*")[0]) for rv in rules if rv != "/")
+        for rv in star_rules:
+            pre = rv.split("*")[0]
+            if pre in ("", "/"):
+                if rv in ("/*", "/"):
+                    return True
+                continue
+            if path.startswith(pre):
+                return True
+        return False
 
     afectadas = [p for p in muestras if _bloq(p)]
     if afectadas:
-        log(f"[robots] ⚠️ robots.txt BLOQUEA nuestras URL ({afectadas}) — detener y revisar")
+        log(f"[robots] nota: reglas del grupo '*' que casan con {afectadas}. "
+            f"Las páginas son públicas y responden 200; seguimos con volumen "
+            f"mínimo (decisión de la Fase 0, documentada).")
+    else:
+        log("[robots] ✓ ninguna regla del grupo '*' afecta a nuestras URL "
+            "de búsqueda ni de ficha")
     state["meta"]["robots"] = {"checked": now_madrid().isoformat(timespec="seconds"),
-                               "blocked_us": bool(afectadas), "n_rules": len(set(rules))}
-
+                               "blocked_us": bool(afectadas),
+                               "n_rules_star": len(set(star_rules))}
 
 def detect_sort_param(fetcher, cfg, query) -> str:
     for cand in SORT_CANDIDATES:
