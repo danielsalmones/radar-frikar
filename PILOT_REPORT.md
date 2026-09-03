@@ -1,6 +1,6 @@
 # Informe del radar — alleweder
 
-> Autogenerado por `src/radar.py` (no editar a mano). Actualizado: 03 Sep 2026 09:42 (Europe/Madrid).
+> Autogenerado por `src/radar.py` (no editar a mano). Actualizado: 03 Sep 2026 11:36 (Europe/Madrid).
 
 **Anuncios en seguimiento:** 6 · activos: 4 · retirados: 2
 **Mínimo histórico visto:** 0 € · **máximo:** 6.000 €
