@@ -27,6 +27,7 @@ import re
 import sys
 import time
 import traceback
+import uuid
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -612,6 +613,22 @@ def fetch_photo(fetcher: Fetcher, url: str) -> bytes | None:
 
 
 # ---------------------------------------------------------------- Telegram
+def _multipart_body(fields: dict, files: dict) -> tuple[bytes, str]:
+    """multipart/form-data construido a mano: curl_cffi no acepta 'files='
+    (API de requests); admite bytes crudos + Content-Type explícito."""
+    b = "radar" + uuid.uuid4().hex
+    out = []
+    for name, value in fields.items():
+        out.append(f'--{b}\r\nContent-Disposition: form-data; name="{name}"'
+                   f'\r\n\r\n{str(value)}\r\n'.encode("utf-8"))
+    for name, (fname, blob, mime) in files.items():
+        out.append(f'--{b}\r\nContent-Disposition: form-data; name="{name}"; '
+                   f'filename="{fname}"\r\nContent-Type: {mime}\r\n\r\n'
+                   .encode("utf-8") + blob + b"\r\n")
+    out.append(f"--{b}--\r\n".encode("utf-8"))
+    return b"".join(out), b
+
+
 def tg_post(method: str, data=None, files=None):
     if DRY_RUN:
         preview = (data or {}).get("text") or (data or {}).get("caption") \
@@ -620,14 +637,19 @@ def tg_post(method: str, data=None, files=None):
         return None
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/{method}"
     try:
-        r = creq.post(url, data=data, files=files, timeout=30)
+        if files:
+            body, boundary = _multipart_body(data or {}, files)
+            r = creq.post(url, data=body, timeout=60,
+                          headers={"Content-Type":
+                                   f"multipart/form-data; boundary={boundary}"})
+        else:
+            r = creq.post(url, data=data, timeout=30)
         if r.status_code != 200:
             log(f"[TG] {method} → {r.status_code}: {r.text[:200]}")
         return r
     except Exception as e:
         log(f"[TG] {method} excepción: {e}")
         return None
-
 
 def send_text(text: str) -> None:
     tg_post("sendMessage", {"chat_id": TELEGRAM_CHAT, "text": text[:3900]})
