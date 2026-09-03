@@ -556,6 +556,16 @@ def parse_detail(html: str) -> dict:
         if 2 <= len(c) <= 60 and not any(b in c.lower() for b in BOTONES):
             seller = c
             break
+        # slug del perfil (/s-seiten/<slug>/…): identificador ESTABLE del vendedor,
+    # mejor que el nombre visible y a prueba de textos de botones
+    slug = ""
+    for a in soup.find_all("a", href=re.compile("/s-seiten/")):
+        m = re.search(r"/s-seiten/([^/]+)/", a.get("href") or "")
+        if m and m.group(1).lower() not in ("user", "users", "profi", "shop",
+                                            "shops", "gewerblich", "privat",
+                                            "member", "profil", "anbieter"):
+            slug = m.group(1)
+            break
     if slug:
         seller = slug
     if not seller:
