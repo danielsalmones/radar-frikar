@@ -10,6 +10,10 @@ Principios:
   * Ante 403/429/captcha: abortar (nunca reintentar en bucle).
   * Sin login, sin cookies persistentes: solo páginas públicas.
 Ver README.md para montaje y pruebas.
+
+v3: fotos con Referer del sitio, vendedor multi-sección con diagnóstico
+    ampliado, fallback de republicación (título+ubicación), detección de la
+    página de bloqueo por rango de IP, log de reglas robots sobre /s-.
 """
 from __future__ import annotations
 
@@ -200,9 +204,8 @@ def title_ratio(a: str, b: str) -> float:
 
 
 def title_compatible(old: str, new: str) -> bool:
-    """True si 'new' es 'old' con añadidos: el alt de la imagen del listado
-    ensucia el título con 'Región - Ciudad'. Evita abrir la ficha cada hora
-    por un falso cambio de título."""
+    """True si 'new' es 'old' con añadidos: el listado ensucia el título con
+    'Región - Ciudad'. Evita abrir la ficha cada hora por un falso cambio."""
     o, n = norm_title(old), norm_title(new)
     if not o or not n:
         return True
@@ -361,7 +364,8 @@ def looks_like_block(r) -> bool:
         head = r.text[:5000].lower()
         return any(s in head for s in ("just a moment", "challenge-platform",
                                        "are you a human", "captcha",
-                                       "enable javascript and cookies"))
+                                       "enable javascript and cookies",
+                                       "ip-bereich", "vorübergehend gesperrt"))
     return False
 
 
@@ -519,22 +523,20 @@ def parse_detail(html: str) -> dict:
     if pel is not None:
         price = parse_price_text(extract_price_token(pel.get_text(" ", strip=True)))
 
+    # ---- vendedor: caza en TODAS las secciones candidatas ----
     seller = ""
     BOTONES = ("nachricht", "message", "schreiben", "senden", "anrufen", "telefon",
                "kontakt", "chat", "merkliste", "profil", "anbieter", "mitglied",
-               "verkäufer", "verkaeufer", "member", "details")
-    ce = (soup.select_one("[id*=viewad-contact]")
-          or soup.select_one("[class*=membercard]")
-          or soup.select_one("[class*=seller]"))
+               "verkäufer", "verkaeufer", "member", "details", "anzeigen",
+               "bewertung", "newsletter", "gesamter")
+    ces = soup.select("[id*=viewad-contact], [class*=membercard], "
+                      "[class*=userprofile], [class*=seller]")
     cands = []
-    if ce is not None:
+    for ce in ces:
         for a in ce.find_all("a"):
             cands.append(a.get_text(" ", strip=True))
-        ne = ce.select_one("[class*=name], [class*=user]")
-        if ne is None:
-            ne = ce.find(["h2", "h3", "b"])
-        if ne is not None:
-            cands.append(ne.get_text(" ", strip=True))
+        for tag in ce.find_all(["h2", "h3", "b", "strong"]):
+            cands.append(tag.get_text(" ", strip=True))
     for a in soup.find_all("a", href=re.compile("/s-seiten/")):
         cands.append(a.get_text(" ", strip=True))
     for c in cands:
@@ -542,11 +544,20 @@ def parse_detail(html: str) -> dict:
         if 2 <= len(c) <= 60 and not any(b in c.lower() for b in BOTONES):
             seller = c
             break
-    if not seller and ce is not None:
-        frag = re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "(email)", str(ce))
-        frag = re.sub(r"\d[\d\s\-+/]{5,}", "(tel)", frag)[:700]
-        log("[vendedor-diag] no encontré el nombre del vendedor; bloque de contacto:\n"
-            "    " + frag)
+    if not seller:
+        # diagnóstico ampliado: textos de las secciones + enlaces de perfil
+        frags = []
+        for ce in ces:
+            t = re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "(email)",
+                       re.sub(r"\s+", " ", ce.get_text(" ", strip=True)))
+            t = re.sub(r"\d[\d\s\-+/]{5,}", "(tel)", t)
+            if t:
+                frags.append(f"SEC[{t[:150]}]")
+        for a in soup.find_all("a", href=re.compile("/s-seiten/")):
+            frags.append(f"LINK[{(a.get('href') or '')[:70]} → "
+                         f"{(a.get_text(' ', strip=True) or '(sin texto)')[:50]}]")
+        log("[vendedor-diag] nombre no encontrado. Secciones/enlaces de contacto "
+            f"({len(frags)}):\n    " + ("\n    ".join(frags[:12]) or "(nada)"))
 
     loc_el = (soup.select_one("#viewad-locality")
               or soup.select_one("[class*=locality]")
@@ -567,6 +578,7 @@ def parse_detail(html: str) -> dict:
         "reserved": "reserviert" in low,
     }
 
+
 def fetch_detail(fetcher: Fetcher, cfg: dict, url: str) -> dict | None:
     try:
         r = fetcher.get(url, referer=cfg["base_url"] + "/")
@@ -586,11 +598,14 @@ def fetch_photo(fetcher: Fetcher, url: str) -> bytes | None:
     if not url:
         return None
     try:
-        r = fetcher.get(url)
+        # Referer del sitio: muchos CDN rechazan imágenes "hotlinkadas" sin él
+        r = fetcher.get(url, referer="https://www.kleinanzeigen.de/")
         ct = (r.headers or {}).get("content-type", "")
         if r.status_code == 200 and len(r.content) < 8_000_000 \
                 and (ct.startswith("image") or r.content[:2] in (b"\xff\xd8", b"\x89P")):
             return r.content
+        if r.status_code != 200:
+            log(f"[foto] HTTP {r.status_code} — no pude descargar la foto del CDN")
     except Exception as e:
         log(f"[foto] error: {e}")
     return None
@@ -745,18 +760,22 @@ def retire_message(ad) -> str:
 
 
 # ---------------------------------------------------------------- lógica central
-def find_republication(ads: dict, exclude_id: str, seller: str, title: str):
+def find_republication(ads: dict, exclude_id: str, seller: str, title: str,
+                       location: str = ""):
+    """Match de republicación: mismo vendedor + título similar; y si no hay
+    nombre de vendedor, título casi idéntico + misma ubicación."""
     best = None
     for aid, a in ads.items():
         if aid == exclude_id or a.get("status") != "retired":
             continue
-        if not a.get("seller_name"):
-            continue
-        if a["seller_name"].strip().lower() != seller.strip().lower():
-            continue
         r = title_ratio(a.get("title", ""), title)
-        if r >= 0.72 and (best is None or r > best[0]):
-            best = (r, a)
+        same_seller = bool(seller and a.get("seller_name")
+                           and a["seller_name"].strip().lower() == seller.strip().lower())
+        same_loc = bool(location and a.get("location")
+                        and str(a["location"]).strip() == str(location).strip())
+        if (same_seller and r >= 0.72) or (r >= 0.85 and same_loc):
+            if best is None or r > best[0]:
+                best = (r, a)
     return best[1] if best else None
 
 
@@ -835,20 +854,23 @@ def process_new_ad(state, cfg, fetcher, card, sources, first_run, events_run,
 
     others = [a for a in ads.values() if a["status"] == "active" and a["id"] != ad_id
               and (a["price"] or {}).get("value") is not None]
-    if price.get("value") is not None and (
-            not others or price["value"] < min(a["price"]["value"] for a in others)):
-        L.append(f"🥇 Es el más barato de los {len(others) + 1} anuncios con precio en seguimiento.")
+    if price.get("value") is not None:
+        if not others:
+            L.append("🥇 Es el único anuncio con precio en seguimiento.")
+        elif price["value"] < min(a["price"]["value"] for a in others):
+            L.append(f"🥇 Es el más barato de los {len(others) + 1} anuncios "
+                     f"con precio en seguimiento.")
     thr = cfg.get("price_threshold_eur")
     if thr and price.get("value") is not None and price["value"] <= thr:
         L.append(f"🔥 Por debajo del umbral configurado (≤ {fmt_eur(thr)}).")
 
-    if want("republicado") and seller:
-        rep = find_republication(ads, ad_id, seller, title)
+    if want("republicado"):
+        rep = find_republication(ads, ad_id, seller, title, ad.get("location") or "")
         if rep:
             lp = last_priced(rep.get("history"))
             L.append("")
-            L.append("🔁 Posible republicación: mismo vendedor y título casi idéntico "
-                     "a un anuncio ya visto.")
+            L.append("🔁 Posible republicación: mismo vendedor (o mismo título+ubicación) "
+                     "que un anuncio ya visto.")
             if lp is not None:
                 L.append(f"No llegó a venderse a {fmt_eur(lp)} — pista útil para negociar.")
             L.append(f"Histórico anterior: {history_line(rep.get('history'))}")
@@ -1009,6 +1031,7 @@ def retire_ad(state, cfg, ad, first_run, events_run) -> None:
         send_text(retire_message(ad))
     events_run.append(add_event(state, "retirado", ad["id"], ad["title"]))
 
+
 def run_detail_rechecks(state, cfg, fetcher, events_run, already_checked: set) -> None:
     """Re-visita fichas (rotación, máx. N por ejecución) para detectar ediciones
     de descripción y otros cambios que la tarjeta no refleja."""
@@ -1037,6 +1060,10 @@ def run_detail_rechecks(state, cfg, fetcher, events_run, already_checked: set) -
         notes = []
         if d.get("seller_name"):
             ad["seller_name"] = d["seller_name"]
+        if d.get("location"):
+            ad["location"] = d["location"]
+        if d.get("shipping"):
+            ad["shipping"] = True
         if d.get("title") and d["title"] != ad["title"]:
             notes.append(("título", ad["title"], d["title"]))
             ad["title"] = d["title"]
@@ -1068,6 +1095,7 @@ def run_detail_rechecks(state, cfg, fetcher, events_run, already_checked: set) -
         if notes and cfg["alerts"].get("editado", True):
             send_text(edit_message(ad, notes))
             events_run.append(add_event(state, "editado", ad["id"], notes[0][0]))
+
 
 def handle_all_blocked(state, cfg, qres, events_run) -> None:
     """Escalera: 1º registra · 2º ⚠️ · 3º pausa 12 h. Nunca reintentos en bucle."""
@@ -1157,12 +1185,14 @@ def maybe_check_robots(fetcher, cfg, state) -> None:
     if r.status_code != 200:
         log(f"[robots] HTTP {r.status_code} — lo registro y sigo")
         return
-    log("[robots] contenido (primeras líneas):\n    " + "\n    ".join(r.text.splitlines()[:25]))
     rules = []
     for l in r.text.splitlines():
         m = re.match(r"(?i)disallow:\s*(\S+)", l.strip())
         if m:
             rules.append(m.group(1))
+    s_rules = sorted({rv for rv in rules if rv.startswith("/s")})
+    log(f"[robots] {len(set(rules))} reglas Disallow; las que afectan a /s… "
+        f"({len(s_rules)}): " + (", ".join(s_rules) if s_rules else "ninguna"))
     slug = re.sub(r"\s+", "-", cfg["queries"][0].strip().lower())
     muestras = [f"/s-{slug}/k0", "/s-anzeige/x/1-1"]
 
@@ -1172,9 +1202,6 @@ def maybe_check_robots(fetcher, cfg, state) -> None:
     afectadas = [p for p in muestras if _bloq(p)]
     if afectadas:
         log(f"[robots] ⚠️ robots.txt BLOQUEA nuestras URL ({afectadas}) — detener y revisar")
-    else:
-        log(f"[robots] ✓ {len(set(rules))} reglas Disallow; ninguna afecta a nuestras "
-            f"URL de búsqueda ni de ficha")
     state["meta"]["robots"] = {"checked": now_madrid().isoformat(timespec="seconds"),
                                "blocked_us": bool(afectadas), "n_rules": len(set(rules))}
 
