@@ -512,17 +512,31 @@ def parse_detail(html: str) -> dict:
         desc = re.sub(r"[ \t]+", " ", d.get_text("\n", strip=True))
     if not desc:
         desc = og("og:description") or og("description")
-
+    desc = re.sub(r"(?i)^beschreibung\s*", "", desc).strip()
+ 
     price = None
     pel = soup.select_one('[id*="price"]') or soup.select_one('[class*="price"]')
     if pel is not None:
         price = parse_price_text(extract_price_token(pel.get_text(" ", strip=True)))
 
     seller = ""
-    sa = soup.select_one('a[href*="/s-seiten/"]')
-    if sa is not None:
-        seller = sa.get_text(" ", strip=True)
-
+    ce = (soup.select_one('[id*="viewad-contact"]')
+          or soup.select_one('[class*="membercard"]')
+          or soup.select_one('[class*="seller"]'))
+    if ce is not None:
+        sa = ce.find("a")
+        if sa is not None:
+            seller = sa.get_text(" ", strip=True)
+        if not seller:
+            seller = ce.get_text(" ", strip=True)[:40]
+    if not seller:
+        sa = soup.select_one('a[href*="/s-seiten/"]')
+        if sa is not None:
+            seller = sa.get_text(" ", strip=True)
+    if seller.lower() in ("zum profil", "profil", "anbieter", "kontakt", "nachricht",
+                          "mitglied", "verkäufer", "verkaeufer", "user", "member"):
+        seller = ""   # texto de un botón, no un nombre: no sirve para el matching
+                           
     loc_el = (soup.select_one("#viewad-locality")
               or soup.select_one('[class*="locality"]')
               or soup.select_one('[id*="locality"]'))
@@ -537,7 +551,8 @@ def parse_detail(html: str) -> dict:
         "seller_name": seller,
         "seller_type": "Gewerblich" if "gewerblich" in low else ("Privat" if "privat" in low else None),
         "photo": og("og:image"),
-        "shipping": "versand" in low,
+        "shipping": bool(soup.select_one('[class*="shipping"], [id*="shipping"]'))
+                    or "versand möglich" in low,
         "reserved": "reserviert" in low,
     }
 
@@ -1011,8 +1026,10 @@ def run_detail_rechecks(state, cfg, fetcher, events_run, already_checked: set) -
             continue
         d = detail
         notes = []
+        if d.get("seller_name"):
+            ad["seller_name"] = d["seller_name"]
         if d.get("title") and d["title"] != ad["title"]:
-            notes.append(("título", ad["title"], d["title"]))
+         notes.append(("título", ad["title"], d["title"]))
             ad["title"] = d["title"]
         desc = d.get("description") or ""
         if desc and hash_text(desc) != ad.get("description_hash"):
