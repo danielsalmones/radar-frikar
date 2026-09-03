@@ -1,0 +1,50 @@
+# ============================================================
+# Radar kleinanzeigen → Telegram · configuración
+# Edita y commitea; entra en vigor en la siguiente ejecución.
+# ============================================================
+
+# --- MISIÓN ACTIVA: PILOTO (alleweder, ~4 anuncios, escala Frikar) ---
+queries: ["alleweder"]
+state_file: state.pilot.json
+report_file: PILOT_REPORT.md
+
+# --- PRODUCCIÓN (al terminar el piloto: comenta lo de arriba y descomenta) ---
+# queries: ["podbike", "frikar"]
+# state_file: state.json
+# report_file: PRICE_REPORT.md
+
+base_url: "https://www.kleinanzeigen.de"
+
+# "auto" autodetecta (sorter=newestOfferTime / sortby=newest / nada) verificando
+# que las fechas salgan descendentes; el resultado se guarda en el state.
+sort_param: "auto"
+
+# --- cortesía HTTP ---
+min_pause_s: 2.0             # pausa aleatoria entre peticiones
+max_pause_s: 5.0
+startup_jitter_max_min: 10   # espera inicial aleatoria (se omite en runs manuales)
+request_timeout_s: 15
+
+# re-visita fichas para detectar ediciones de descripción
+# (retraso máximo de detección ≈ estas horas)
+detail_recheck_hours: 36
+detail_recheck_max_per_run: 2
+
+# --- alertas ---
+price_threshold_eur: null    # p. ej. 5000 → 🔥 al cruzarlo; null = verlo todo
+proxy_url: ""                # proxy residencial SOLO si hay bloqueos crónicos
+alerts:
+  nuevo: true
+  bajada: true
+  subida: true
+  precio_aparecido: true
+  retirado: true
+  republicado: true
+  editado: true
+  fallo: true
+  latido: true
+
+# --- fotos y gráficas ---
+photo_send_bytes: true       # descargar foto y subirla como bytes (más fiable)
+chart_enabled: true
+chart_min_distinct_prices: 2 # gráfica solo con ≥2 precios distintos
