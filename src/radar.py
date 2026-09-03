@@ -802,7 +802,11 @@ def retire_message(ad) -> str:
 def find_republication(ads: dict, exclude_id: str, seller: str, title: str,
                        location: str = ""):
     """Match de republicación: mismo vendedor + título similar; y si no hay
-    nombre de vendedor, título casi idéntico + misma ubicación."""
+    nombre de vendedor, título casi idéntico + misma ubicación (por PLZ:
+    '33034 Nordrhein-Westfalen - Brakel' y '33034 Brakel' son lo mismo)."""
+    def loc_key(loc):
+        m = re.search(r"\d{5}", str(loc or ""))
+        return m.group(0) if m else str(loc or "").strip().lower()
     best = None
     for aid, a in ads.items():
         if aid == exclude_id or a.get("status") != "retired":
@@ -810,8 +814,7 @@ def find_republication(ads: dict, exclude_id: str, seller: str, title: str,
         r = title_ratio(a.get("title", ""), title)
         same_seller = bool(seller and a.get("seller_name")
                            and a["seller_name"].strip().lower() == seller.strip().lower())
-        same_loc = bool(location and a.get("location")
-                        and str(a["location"]).strip() == str(location).strip())
+        same_loc = bool(loc_key(location) and loc_key(location) == loc_key(a.get("location")))
         if (same_seller and r >= 0.72) or (r >= 0.85 and same_loc):
             if best is None or r > best[0]:
                 best = (r, a)
@@ -1472,20 +1475,8 @@ def run() -> None:
             seen.setdefault(c["id"], c)
             sources.setdefault(c["id"], set()).add(q)
 
-    detail_fetched: set = set()
-    for i, (ad_id, card) in enumerate(seen.items()):
-        ad = state["ads"].get(ad_id)
-        if ad is None or ad.get("status") != "active":
-            allow_detail = (not first_run) or i < 20   # tope de fichas en la baseline
-            process_new_ad(state, cfg, fetcher, card, sources, first_run, events_run,
-                           allow_detail)
-            if allow_detail:
-                detail_fetched.add(ad_id)
-        elif process_existing_ad(state, cfg, fetcher, ad, card, sources, first_run,
-                                 events_run):
-            detail_fetched.add(ad_id)
-
-    # ---- retirados ----
+    # ---- retirados (ANTES de procesar nuevos: así un anuncio borrado y
+    # republicado dentro de la misma hora enlaza su histórico vía 🔁) ----
     for ad_id, ad in list(state["ads"].items()):
         if ad.get("status") != "active" or ad_id in seen:
             continue
@@ -1509,6 +1500,20 @@ def run() -> None:
             log(f"[retirado?] {ad_id} sigue vivo (cayó de la página 1)")
         else:
             log(f"[retirado?] ficha HTTP {r.status_code} — lo dejo activo")
+
+    # ---- tarjetas: nuevos y existentes ----
+    detail_fetched: set = set()
+    for i, (ad_id, card) in enumerate(seen.items()):
+        ad = state["ads"].get(ad_id)
+        if ad is None or ad.get("status") != "active":
+            allow_detail = (not first_run) or i < 20   # tope de fichas en la baseline
+            process_new_ad(state, cfg, fetcher, card, sources, first_run, events_run,
+                           allow_detail)
+            if allow_detail:
+                detail_fetched.add(ad_id)
+        elif process_existing_ad(state, cfg, fetcher, ad, card, sources, first_run,
+                                 events_run):
+            detail_fetched.add(ad_id)
 
     if not first_run:
         run_detail_rechecks(state, cfg, fetcher, events_run, detail_fetched)
