@@ -39,6 +39,9 @@ SORT_CANDIDATES = ["sorter=newestOfferTime", "sortby=newest", ""]
 EMOJI = {"nuevo": "🆕", "bajada": "📉", "subida": "📈", "precio_aparecido": "💰",
          "retirado": "🗑️", "republicado": "🔁", "editado": "✏️", "pausa": "🛑",
          "baseline": "✅", "latido": "📋"}
+BUNDES = ("Baden-Württemberg|Bayern|Berlin|Brandenburg|Bremen|Hamburg|Hessen|"
+          "Mecklenburg-Vorpommern|Niedersachsen|Nordrhein-Westfalen|Rheinland-Pfalz|"
+          "Saarland|Sachsen-Anhalt|Sachsen|Schleswig-Holstein|Thüringen")
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT = os.environ.get("TELEGRAM_CHAT_ID", "")
@@ -194,6 +197,16 @@ def norm_title(s: str) -> str:
 
 def title_ratio(a: str, b: str) -> float:
     return difflib.SequenceMatcher(None, norm_title(a), norm_title(b)).ratio()
+
+
+def title_compatible(old: str, new: str) -> bool:
+    """True si 'new' es 'old' con añadidos: el alt de la imagen del listado
+    ensucia el título con 'Región - Ciudad'. Evita abrir la ficha cada hora
+    por un falso cambio de título."""
+    o, n = norm_title(old), norm_title(new)
+    if not o or not n:
+        return True
+    return n == o or n.startswith(o) or o.startswith(n)
 
 
 def diff_snippet(old: str, new: str) -> str:
@@ -384,10 +397,16 @@ def extract_card(el, base_url: str) -> dict | None:
         title = (a.get("title") or a.get("aria-label") or "").strip()
     if not title:
         title = a.get_text(" ", strip=True)[:80]
+    title = title.strip()
 
     ntext = el.get_text(" ", strip=True)
     low = ntext.lower()
-    price = parse_price_text(extract_price_token(ntext))
+    # precio: primero el elemento específico, luego todo el texto de la tarjeta
+    pel = el.select_one('[class*="price"]')
+    price_tok = extract_price_token(pel.get_text(" ", strip=True)) if pel is not None else ""
+    if not price_tok:
+        price_tok = extract_price_token(ntext)
+    price = parse_price_text(price_tok)
     dm = DATE_TOKEN_RE.search(ntext)
     publish = parse_site_date(dm.group(0)) if dm else None
 
@@ -399,10 +418,16 @@ def extract_card(el, base_url: str) -> dict | None:
         km = re.search(r"\bKreis\s+[A-Za-zäöüß.\-]{2,40}", ntext)
         if km:
             loc = km.group(0).strip()
+        else:
+            bm = re.search(rf"([A-ZÄÖÜ][A-Za-zäöüß.\- ]{{2,30}}),\s*({BUNDES})", ntext)
+            if bm:
+                loc = f"{bm.group(1).strip()} ({bm.group(2)})"
 
     img_url = ""
     if img is not None:
         img_url = img.get("src") or img.get("data-src") or ""
+        if not img_url:
+            img_url = (img.get("srcset") or "").split(",")[0].strip().split(" ")[0]
         if img_url.startswith("//"):
             img_url = "https:" + img_url
 
@@ -438,7 +463,10 @@ def parse_search(html: str, base_url: str) -> dict:
             if not m or m.group(1) in seen_ids:
                 continue
             seen_ids.add(m.group(1))
-            nodes.append(a.parent if a.parent is not None else a)
+            # contenedor de la tarjeta completa: el <article>/<li> del anuncio,
+            # no el mero enlace (así el texto incluye precio, ubicación e insignias)
+            container = a.find_parent(["article", "li"]) or a.parent or a
+            nodes.append(container)
         method = "href /s-anzeige/"
 
     for el in nodes:
@@ -452,7 +480,7 @@ def parse_search(html: str, base_url: str) -> dict:
 
     text_all = soup.get_text(" ", strip=True)
     m = (re.search(r"\(([\d.,]+)\)\s*Anzeigen", text_all)
-         or re.search(r"([\d.,]+)\s*Anzeigen\s+gefund", text_all))
+         or re.search(r"([\d.,]+)\s*(?:Anzeigen|Ergebnisse|Treffer)\s*(?:gefund\w*)?", text_all))
     if m:
         try:
             out["total"] = int(m.group(1).replace(".", ""))
@@ -495,11 +523,17 @@ def parse_detail(html: str) -> dict:
     if sa is not None:
         seller = sa.get_text(" ", strip=True)
 
+    loc_el = (soup.select_one("#viewad-locality")
+              or soup.select_one('[class*="locality"]')
+              or soup.select_one('[id*="locality"]'))
+    location = loc_el.get_text(" ", strip=True) if loc_el is not None else ""
+
     low = soup.get_text(" ", strip=True).lower()
     return {
         "title": title,
         "description": desc,
         "price": price,
+        "location": location,
         "seller_name": seller,
         "seller_type": "Gewerblich" if "gewerblich" in low else ("Privat" if "privat" in low else None),
         "photo": og("og:image"),
@@ -719,7 +753,7 @@ def process_new_ad(state, cfg, fetcher, card, sources, first_run, events_run,
     if price.get("value") is None and (d.get("price") or {}).get("value") is not None:
         price = d["price"]     # la ficha enseña un precio que la tarjeta no mostró
 
-    title = card["title"] or d.get("title") or "(sin título)"
+    title = (d.get("title") or card["title"] or "(sin título)").strip()
 
     photo_bytes = None
     if not first_run and cfg["photo_send_bytes"] and photo_url:
@@ -730,7 +764,7 @@ def process_new_ad(state, cfg, fetcher, card, sources, first_run, events_run,
         "id": ad_id,
         "title": title,
         "detail_url": card["detail_url"],
-        "location": card["location"],
+        "location": card["location"] or d.get("location") or "",
         "seller_name": seller,
         "seller_type": "Gewerblich" if card["commercial"] else (d.get("seller_type") or "Privat"),
         "shipping": bool(card["shipping"] or d.get("shipping")),
@@ -738,7 +772,7 @@ def process_new_ad(state, cfg, fetcher, card, sources, first_run, events_run,
         "reserved": bool(card["reserved"] or d.get("reserved")),
         "publish_date": to_iso(card["publish"]) or (prev or {}).get("publish_date"),
         "price": price,
-        "history": (prev.get("history") or []) + [[to_iso(today()), price.get("value")]],
+        "history": ((prev or {}).get("history") or []) + [[to_iso(today()), price.get("value")]],
         "description": desc,
         "description_hash": hash_text(desc),
         "photo_url": photo_url,
@@ -808,11 +842,12 @@ def process_existing_ad(state, cfg, fetcher, ad, card, sources, first_run,
     ad["queries"] = sorted(set(ad.get("queries", [])) | sources.get(ad["id"], set()))
 
     old_price = ad.get("price") or {}
-    old_title = ad.get("title") or ""
+    old_title = (ad.get("title") or "").strip()
     old_reserved = bool(ad.get("reserved"))
     old_shipping = bool(ad.get("shipping"))
     old_desc = ad.get("description") or ""
     new_price = card["price"] or {}
+    card_title = (card.get("title") or "").strip()
 
     price_kind = None
     if old_price.get("value") != new_price.get("value") \
@@ -827,8 +862,11 @@ def process_existing_ad(state, cfg, fetcher, ad, card, sources, first_run,
         price_kind = "flag_vb"
 
     reserved_changed = card["reserved"] != old_reserved
+    # el listado "ensucia" el título (Región - Ciudad del alt de la imagen):
+    # solo abrimos ficha si cambia de verdad
+    titles_compatible = title_compatible(old_title, card_title)
     need_detail = price_kind in ("aparecido", "desaparecido", "cambio") \
-        or (bool(card["title"]) and card["title"] != old_title) \
+        or (bool(card_title) and not titles_compatible) \
         or reserved_changed
 
     d: dict = {}
@@ -857,8 +895,11 @@ def process_existing_ad(state, cfg, fetcher, ad, card, sources, first_run,
         reserved_changed = False
         log("[warn] la insignia Reserviert de la tarjeta no coincide con la ficha — ignoro")
 
-    final_title = card["title"] or d.get("title") or old_title
-    title_changed = final_title != old_title
+    if d:
+        final_title = (d.get("title") or old_title or card_title).strip()
+    else:
+        final_title = card_title if (card_title and not titles_compatible) else old_title
+    title_changed = bool(final_title) and final_title != old_title
     desc_changed = bool(desc_new) and hash_text(desc_new) != ad.get("description_hash")
 
     # ---- aplicar al estado ----
@@ -869,7 +910,9 @@ def process_existing_ad(state, cfg, fetcher, ad, card, sources, first_run,
         ad["price"] = new_price
     if title_changed:
         ad["title"] = final_title
-    if card["location"]:
+    if d.get("location"):
+        ad["location"] = d["location"]
+    elif card["location"]:
         ad["location"] = card["location"]
     if card["publish"]:
         ad["publish_date"] = to_iso(card["publish"])
@@ -881,12 +924,13 @@ def process_existing_ad(state, cfg, fetcher, ad, card, sources, first_run,
         ad["seller_name"] = d["seller_name"]
     if d.get("photo"):
         ad["photo_url"] = d["photo"]
-    if card["shipping"]:
+    if d:
+        ad["shipping"] = bool(ad.get("shipping") or card["shipping"] or d.get("shipping"))
+    elif card["shipping"]:
         ad["shipping"] = True
     ad["reserved"] = bool(d.get("reserved")) if d else bool(card["reserved"])
     if need_detail:
         ad["last_detail_check"] = now_iso
-        ad["shipping"] = bool(ad.get("shipping") or card["shipping"] or d.get("shipping"))
         if desc_changed:
             ad["description"] = desc_new
             ad["description_hash"] = hash_text(desc_new)
@@ -1089,12 +1133,25 @@ def maybe_check_robots(fetcher, cfg, state) -> None:
         log(f"[robots] HTTP {r.status_code} — lo registro y sigo")
         return
     log("[robots] contenido (primeras líneas):\n    " + "\n    ".join(r.text.splitlines()[:25]))
-    dis_s = [l.strip() for l in r.text.splitlines()
-             if re.match(r"(?i)disallow:\s*/s($|[-/?])", l.strip())]
-    if dis_s:
-        log(f"[robots] ⚠️ reglas Disallow que podrían afectar a /s-…: {dis_s}")
+    rules = []
+    for l in r.text.splitlines():
+        m = re.match(r"(?i)disallow:\s*(\S+)", l.strip())
+        if m:
+            rules.append(m.group(1))
+    slug = re.sub(r"\s+", "-", cfg["queries"][0].strip().lower())
+    muestras = [f"/s-{slug}/k0", "/s-anzeige/x/1-1"]
+
+    def _bloq(path):
+        return any(path.startswith(rv.split("*")[0]) for rv in rules if rv != "/")
+
+    afectadas = [p for p in muestras if _bloq(p)]
+    if afectadas:
+        log(f"[robots] ⚠️ robots.txt BLOQUEA nuestras URL ({afectadas}) — detener y revisar")
+    else:
+        log(f"[robots] ✓ {len(set(rules))} reglas Disallow; ninguna afecta a nuestras "
+            f"URL de búsqueda ni de ficha")
     state["meta"]["robots"] = {"checked": now_madrid().isoformat(timespec="seconds"),
-                               "disallow_s": dis_s[:5]}
+                               "blocked_us": bool(afectadas), "n_rules": len(set(rules))}
 
 
 def detect_sort_param(fetcher, cfg, query) -> str:
