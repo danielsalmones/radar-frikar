@@ -50,9 +50,11 @@ BUNDES = ("Baden-Württemberg|Bayern|Berlin|Brandenburg|Bremen|Hamburg|Hessen|"
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT = os.environ.get("TELEGRAM_CHAT_ID", "")
-DRY_RUN = bool(os.environ.get("RADAR_DRY_RUN")) or not (TELEGRAM_TOKEN and TELEGRAM_CHAT)
-FAST = bool(os.environ.get("RADAR_FAST"))
-FORCE_HEARTBEAT = bool(os.environ.get("RADAR_FORCE_HEARTBEAT"))
+# ojo: las variables de entorno son TEXTO y bool("0") es True en Python.
+# Hay que comparar contra "1" exacto para que "0" sea de verdad "no".
+DRY_RUN = os.environ.get("RADAR_DRY_RUN") == "1" or not (TELEGRAM_TOKEN and TELEGRAM_CHAT)
+FAST = os.environ.get("RADAR_FAST") == "1"
+FORCE_HEARTBEAT = os.environ.get("RADAR_FORCE_HEARTBEAT") == "1"
 COMMIT_MSG_PATH = Path("/tmp/radar_commit_msg")
 
 
