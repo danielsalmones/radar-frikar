@@ -134,6 +134,12 @@
     "type": "latido",
     "id": null,
     "text": "4 activos"
+   },
+   {
+    "ts": "2026-09-04T17:15:23+02:00",
+    "type": "retirado",
+    "id": "3452369760",
+    "text": "Alleweder x"
    }
   ]
  },
@@ -169,7 +175,7 @@
    "photo_url": "https://img.kleinanzeigen.de/api/v1/prod-ads/images/a6/a6ae25e3-c6ff-41d6-8c3a-22602c4c7b39?rule=$_59.JPG",
    "status": "active",
    "first_seen": "2026-09-03T07:24:31+02:00",
-   "last_seen": "2026-09-04T13:54:06+02:00",
+   "last_seen": "2026-09-04T17:15:23+02:00",
    "last_detail_check": "2026-09-03T11:58:50+02:00",
    "queries": [
     "alleweder"
@@ -200,9 +206,9 @@
    "description": "Hallo, ich suche ein sehr gut erhaltenes Velomobil Alleweder 6. Ich freue mich auf Angebote!",
    "description_hash": "a327a3f235496c97",
    "photo_url": "https://static.kleinanzeigen.de/static/img/common/logo/logo-kleinanzeigen-og-vertical.png",
-   "status": "active",
+   "status": "retired",
    "first_seen": "2026-09-03T07:24:35+02:00",
-   "last_seen": "2026-09-04T13:54:06+02:00",
+   "last_seen": "2026-09-04T17:15:22+02:00",
    "last_detail_check": "2026-09-03T11:49:02+02:00",
    "queries": [
     "alleweder"
@@ -235,7 +241,7 @@
    "photo_url": "https://static.kleinanzeigen.de/static/img/common/logo/logo-kleinanzeigen-og-vertical.png",
    "status": "active",
    "first_seen": "2026-09-03T07:24:39+02:00",
-   "last_seen": "2026-09-04T13:54:06+02:00",
+   "last_seen": "2026-09-04T17:15:23+02:00",
    "last_detail_check": "2026-09-03T07:24:39+02:00",
    "queries": [
     "alleweder"
@@ -272,7 +278,7 @@
    "photo_url": "https://img.kleinanzeigen.de/api/v1/prod-ads/images/13/131d566f-8d2d-4cf8-852e-79da5c2a67ba?rule=$_59.JPG",
    "status": "active",
    "first_seen": "2026-09-03T08:36:51+02:00",
-   "last_seen": "2026-09-04T13:54:06+02:00",
+   "last_seen": "2026-09-04T17:15:23+02:00",
    "last_detail_check": "2026-09-03T09:02:47+02:00",
    "queries": [
     "alleweder"
