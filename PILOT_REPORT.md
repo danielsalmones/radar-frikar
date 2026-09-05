@@ -1,6 +1,6 @@
 # Informe del radar — alleweder
 
-> Autogenerado por `src/radar.py` (no editar a mano). Actualizado: 05 Sep 2026 23:44 (Europe/Madrid).
+> Autogenerado por `src/radar.py` (no editar a mano). Actualizado: 06 Sep 2026 01:27 (Europe/Madrid).
 
 **Anuncios en seguimiento:** 4 · activos: 3 · retirados: 1
 **Mínimo histórico visto:** 0 € · **máximo:** 5.555 €
@@ -17,4 +17,4 @@
 
 | Anuncio | Precio | Histórico | Publicado | Ubicación · vendedor | Visto | Estado |
 |---|---|---|---|---|---|---|
-| [Alleweder x](https://www.kleinanzeigen.de/s-anzeige/alleweder-x/3452369760-217-17622) | 5.555 € | 5.555 € (3 sep) | 6 jul | 22047 Gartenstadt · Privat | 3 sep → ayer | 🗑️ retirado |
+| [Alleweder x](https://www.kleinanzeigen.de/s-anzeige/alleweder-x/3452369760-217-17622) | 5.555 € | 5.555 € (3 sep) | 6 jul | 22047 Gartenstadt · Privat | 3 sep → 4 sep | 🗑️ retirado |
