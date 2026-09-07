@@ -6,8 +6,8 @@
    "alleweder"
   ],
   "sort_param_detected": "sorter=newestOfferTime",
-  "consecutive_blocked": 2,
-  "pause_until": null,
+  "consecutive_blocked": 3,
+  "pause_until": "2026-09-07T20:39:54.878915+02:00",
   "last_heartbeat": "2026-09-06T11:32:29+02:00",
   "robots": {
    "checked": "2026-09-03T07:24:15+02:00",
@@ -200,6 +200,18 @@
     "type": "bloqueo",
     "id": null,
     "text": "motivo: HTTP 403/bloqueo"
+   },
+   {
+    "ts": "2026-09-07T08:39:54+02:00",
+    "type": "bloqueo",
+    "id": null,
+    "text": "motivo: HTTP 403/bloqueo"
+   },
+   {
+    "ts": "2026-09-07T08:39:54+02:00",
+    "type": "pausa",
+    "id": null,
+    "text": "hasta 2026-09-07 20:39"
    }
   ]
  },
