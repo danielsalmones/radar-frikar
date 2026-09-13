@@ -6,7 +6,7 @@
    "alleweder"
   ],
   "sort_param_detected": "sorter=newestOfferTime",
-  "consecutive_blocked": 1,
+  "consecutive_blocked": 2,
   "pause_until": null,
   "last_heartbeat": "2026-09-06T11:32:29+02:00",
   "robots": {
@@ -239,6 +239,12 @@
    },
    {
     "ts": "2026-09-13T03:33:50+02:00",
+    "type": "bloqueo",
+    "id": null,
+    "text": "motivo: HTTP 403/bloqueo"
+   },
+   {
+    "ts": "2026-09-13T08:16:38+02:00",
     "type": "bloqueo",
     "id": null,
     "text": "motivo: HTTP 403/bloqueo"
