@@ -6,7 +6,7 @@
    "alleweder"
   ],
   "sort_param_detected": "sorter=newestOfferTime",
-  "consecutive_blocked": 0,
+  "consecutive_blocked": 1,
   "pause_until": null,
   "last_heartbeat": "2026-09-06T11:32:29+02:00",
   "robots": {
@@ -254,6 +254,12 @@
     "type": "bajada",
     "id": "3477860040",
     "text": "3.100 € → 3.050 €"
+   },
+   {
+    "ts": "2026-09-13T21:30:13+02:00",
+    "type": "bloqueo",
+    "id": null,
+    "text": "motivo: HTTP 403/bloqueo"
    }
   ]
  },
