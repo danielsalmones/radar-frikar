@@ -1,0 +1,28 @@
+{
+ "state_version": 2,
+ "meta": {
+  "created": "2026-09-18T15:41:28+02:00",
+  "queries": [
+   "podbike",
+   "frikar"
+  ],
+  "sort_param_detected": "sorter=newestOfferTime",
+  "consecutive_blocked": 0,
+  "pause_until": null,
+  "last_heartbeat": null,
+  "robots": {
+   "checked": "2026-09-18T15:41:28+02:00",
+   "blocked_us": false,
+   "n_rules_star": 250
+  },
+  "events": [
+   {
+    "ts": "2026-09-18T15:41:40+02:00",
+    "type": "baseline",
+    "id": null,
+    "text": "0 anuncios"
+   }
+  ]
+ },
+ "ads": {}
+}
