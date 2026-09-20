@@ -9,7 +9,7 @@
   "sort_param_detected": "sorter=newestOfferTime",
   "consecutive_blocked": 0,
   "pause_until": null,
-  "last_heartbeat": null,
+  "last_heartbeat": "2026-09-20T12:16:14+02:00",
   "robots": {
    "checked": "2026-09-18T15:41:28+02:00",
    "blocked_us": false,
@@ -21,6 +21,12 @@
     "type": "baseline",
     "id": null,
     "text": "0 anuncios"
+   },
+   {
+    "ts": "2026-09-20T12:16:14+02:00",
+    "type": "latido",
+    "id": null,
+    "text": "0 activos"
    }
   ]
  },
