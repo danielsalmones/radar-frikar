@@ -9,7 +9,7 @@
   "sort_param_detected": "sorter=newestOfferTime",
   "consecutive_blocked": 0,
   "pause_until": null,
-  "last_heartbeat": "2026-09-20T12:16:14+02:00",
+  "last_heartbeat": "2026-10-04T12:19:40+02:00",
   "robots": {
    "checked": "2026-10-02T20:29:21+02:00",
    "blocked_us": false,
@@ -24,6 +24,12 @@
    },
    {
     "ts": "2026-09-20T12:16:14+02:00",
+    "type": "latido",
+    "id": null,
+    "text": "0 activos"
+   },
+   {
+    "ts": "2026-10-04T12:19:41+02:00",
     "type": "latido",
     "id": null,
     "text": "0 activos"
