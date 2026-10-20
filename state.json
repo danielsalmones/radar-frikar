@@ -45,8 +45,49 @@
     "type": "latido",
     "id": null,
     "text": "0 activos"
+   },
+   {
+    "ts": "2026-10-20T20:32:30+02:00",
+    "type": "nuevo",
+    "id": "3546993954",
+    "text": "Podbike, Frikar, Velomobil, 3 Akkus, Anhängerkupplung, nur 60km"
    }
   ]
  },
- "ads": {}
+ "ads": {
+  "3546993954": {
+   "id": "3546993954",
+   "title": "Podbike, Frikar, Velomobil, 3 Akkus, Anhängerkupplung, nur 60km",
+   "detail_url": "https://www.kleinanzeigen.de/s-anzeige/podbike-frikar-velomobil-3-akkus-anhaengerkupplung-nur-60km/3546993954-217-455",
+   "location": "23714 Malente",
+   "seller_name": "TN",
+   "seller_type": "Privat",
+   "shipping": false,
+   "is_search": false,
+   "reserved": false,
+   "publish_date": "2026-10-20",
+   "price": {
+    "value": 7777,
+    "negotiable": true,
+    "free": false
+   },
+   "history": [
+    [
+     "2026-10-20",
+     7777
+    ]
+   ],
+   "description": "Das 162 von 180 Stück aus der ersten Serie.\nIch bin jetzt weniger als 100 Kilomter damit gefahren,\ndeshalb in gute, interessierte Hände abzugeben.\nAktueller Neupreis, 11300 Euro, mit nur einem Akku und ohne Anhängerkupplung.\n1 Ersatz Riemen\n1x Ersatzreifen mit Spikes, unbenutzt\nBaujahr, Anfang 2025\nhttps://www.youtube.com/watch?v=dRdL5aQ4GQo\nhttps://www.youtube.com/watch?v=6GDeaPwgUXc",
+   "description_hash": "dbcd9c3595caed44",
+   "photo_url": "https://img.kleinanzeigen.de/api/v1/prod-ads/images/56/56c840a8-d93d-4ff0-aa9e-0d5fd12411f1?rule=$_59.JPG",
+   "status": "active",
+   "first_seen": "2026-10-20T20:32:29+02:00",
+   "last_seen": "2026-10-20T20:32:29+02:00",
+   "last_detail_check": "2026-10-20T20:32:29+02:00",
+   "queries": [
+    "frikar",
+    "podbike"
+   ]
+  }
+ }
 }
