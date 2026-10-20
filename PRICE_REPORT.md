@@ -1,6 +1,6 @@
 # Informe del radar — podbike · frikar
 
-> Autogenerado por `src/radar.py` (no editar a mano). Actualizado: 20 Oct 2026 00:31 (Europe/Madrid).
+> Autogenerado por `src/radar.py` (no editar a mano). Actualizado: 20 Oct 2026 02:45 (Europe/Madrid).
 
 **Anuncios en seguimiento:** 0 · activos: 0 · retirados: 0
 
