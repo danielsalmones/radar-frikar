@@ -51,6 +51,12 @@
     "type": "nuevo",
     "id": "3546993954",
     "text": "Podbike, Frikar, Velomobil, 3 Akkus, Anhängerkupplung, nur 60km"
+   },
+   {
+    "ts": "2026-10-21T15:57:34+02:00",
+    "type": "nuevo",
+    "id": "3547648277",
+    "text": "Podbike FRIKAR Signature Edition 174/180 | Limitiertes Velomobil"
    }
   ]
  },
@@ -82,8 +88,42 @@
    "photo_url": "https://img.kleinanzeigen.de/api/v1/prod-ads/images/56/56c840a8-d93d-4ff0-aa9e-0d5fd12411f1?rule=$_59.JPG",
    "status": "active",
    "first_seen": "2026-10-20T20:32:29+02:00",
-   "last_seen": "2026-10-21T14:35:16+02:00",
+   "last_seen": "2026-10-21T15:57:34+02:00",
    "last_detail_check": "2026-10-20T20:32:29+02:00",
+   "queries": [
+    "frikar",
+    "podbike"
+   ]
+  },
+  "3547648277": {
+   "id": "3547648277",
+   "title": "Podbike FRIKAR Signature Edition 174/180 | Limitiertes Velomobil",
+   "detail_url": "https://www.kleinanzeigen.de/s-anzeige/podbike-frikar-signature-edition-174-180-limitiertes-velomobil/3547648277-217-1128",
+   "location": "47506 Neukirchen-Vluyn",
+   "seller_name": "Ralf",
+   "seller_type": "Privat",
+   "shipping": false,
+   "is_search": false,
+   "reserved": false,
+   "publish_date": "2026-10-21",
+   "price": {
+    "value": 6000,
+    "negotiable": true,
+    "free": false
+   },
+   "history": [
+    [
+     "2026-10-21",
+     6000
+    ]
+   ],
+   "description": "Zum Verkauf steht mein Podbike FRIKAR Signature Edition, Nummer 174 von nur 180 Exemplaren der limitierten Serie.\nDas außergewöhnliche, elektrisch unterstützte Velomobil verfügt über eine geschlossene Fahrerkabine mit aufklappbarer Haube und bietet dadurch einen guten Wetterschutz.\nFahrzeugdaten:\n- Modell: Podbike FRIKAR Signature Edition\n- Limitierte Sonderedition: Nr. 174/180\n- Farbe: Weiß/Anthrazit\n- Laufleistung: ca. 460 km\n- Ein Akku vorhanden\n- Ein Ersatz-Antriebsriemen inklusive\nDas Fahrzeug ist fahrbereit und wurde zuletzt wieder regelmäßig genutzt.\nEin früherer Montagefehler wurde im Rahmen einer Reparatur behoben.\nAufgrund der geringen Laufleistung und der limitierten Signature Edition ist das FRIKAR auch für Liebhaber außergewöhnlicher Velomobile interessant.\nBesichtigung und Abholung nach Absprache möglich.\nPreis: 6.000 € Verhandlungsbasis\nPrivatverkauf. Keine Garantie, keine Rücknahme. Der Verkauf erfolgt unter Ausschluss der gesetzlichen Gewährleistung.",
+   "description_hash": "2518fbad7d537e45",
+   "photo_url": "https://img.kleinanzeigen.de/api/v1/prod-ads/images/cd/cd251afe-04aa-4a67-8634-c3f3cba458d7?rule=$_59.JPG",
+   "status": "active",
+   "first_seen": "2026-10-21T15:57:33+02:00",
+   "last_seen": "2026-10-21T15:57:33+02:00",
+   "last_detail_check": "2026-10-21T15:57:33+02:00",
    "queries": [
     "frikar",
     "podbike"
