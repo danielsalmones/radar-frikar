@@ -1,6 +1,6 @@
 # Informe del radar — podbike · frikar
 
-> Autogenerado por `src/radar.py` (no editar a mano). Actualizado: 31 Oct 2026 02:06 (Europe/Madrid).
+> Autogenerado por `src/radar.py` (no editar a mano). Actualizado: 31 Oct 2026 08:09 (Europe/Madrid).
 
 **Anuncios en seguimiento:** 2 · activos: 2 · retirados: 0
 **Mínimo histórico visto:** 6.000 € · **máximo:** 7.777 €
